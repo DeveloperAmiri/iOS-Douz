@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="iOS-Douz — a classic two-player Tic-Tac-Toe game with a native iOS look and feel. Pure HTML, CSS and JavaScript, open source under the MIT License.">
+  <title>iOS-Douz · Tic-Tac-Toe</title>
+
+  <!-- Favicon: inline SVG data URI, so no extra network request and no path issues on GitHub Pages. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23007AFF'/%3E%3Cpath d='M9.5 9.5 22.5 22.5M22.5 9.5 9.5 22.5' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+
+  <!-- Resolve the saved appearance before the first paint, so the page never
+       flashes the wrong theme. The real logic lives in js/ui.js. -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('ios-douz:appearance');
+        var dark = saved ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (error) { /* storage unavailable — fall back to light */ }
+    })();
+  </script>
+
+  <!-- All asset paths are RELATIVE so the game also works from a GitHub Pages sub-path
+       such as https://username.github.io/iOS-Douz/ -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation bar: translucent, with backdrop blur (iOS UINavigationBar). -->
+  <header class="nav-bar">
+    <div class="nav-bar__inner">
+      <div class="nav-bar__side nav-bar__side--leading">
+        <button class="bar-button" id="newGameButton" type="button" aria-label="New game">
+          <span class="bar-button__icon" data-icon="refresh" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <h1 class="nav-bar__title">iOS-Douz</h1>
+
+      <div class="nav-bar__side nav-bar__side--trailing">
+        <button class="bar-button" id="infoButton" type="button" aria-label="About this app">
+          <span class="bar-button__icon" data-icon="info" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app" id="app">
+
+    <!-- Turn indicator, rendered as an iOS segmented control. -->
+    <section class="turn" aria-labelledby="turnCaption">
+      <p class="turn__caption" id="turnCaption">Turn</p>
+      <div class="segmented-control" role="group" aria-label="Current turn">
+        <span class="segmented-control__thumb" id="turnThumb" aria-hidden="true"></span>
+        <div class="segmented-control__item is-selected" id="segmentX" aria-hidden="true">
+          <svg class="mark mark--xs" viewBox="0 0 24 24" aria-hidden="true">
+            <path class="mark__stroke mark__stroke--x" d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/>
+          </svg>
+          <span class="segmented-control__label">Player X</span>
+        </div>
+        <div class="segmented-control__item" id="segmentO" aria-hidden="true">
+          <svg class="mark mark--xs" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="mark__stroke mark__stroke--o" cx="12" cy="12" r="5.5"/>
+          </svg>
+          <span class="segmented-control__label">Player O</span>
+        </div>
+      </div>
+      <p class="turn__hint" id="turnHint">Tap a square to play</p>
+    </section>
+
+    <!-- Scoreboard -->
+    <section class="scores" aria-label="Scoreboard">
+      <article class="score-card score-card--x" id="scoreX">
+        <span class="score-card__badge" aria-hidden="true">
+          <svg class="mark mark--xs" viewBox="0 0 24 24">
+            <path class="mark__stroke mark__stroke--x" d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/>
+          </svg>
+        </span>
+        <span class="score-card__meta">
+          <span class="score-card__label">Player X</span>
+          <span class="score-card__value" id="scoreXValue">0</span>
+        </span>
+        <span class="score-card__unit">wins</span>
+      </article>
+
+      <article class="score-card score-card--draws" id="scoreDraws">
+        <span class="score-card__badge score-card__badge--draws" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path class="mark__stroke mark__stroke--draws" d="M6.5 8h11M6.5 16h11"/>
+          </svg>
+        </span>
+        <span class="score-card__meta">
+          <span class="score-card__label">Draws</span>
+          <span class="score-card__value" id="scoreDrawsValue">0</span>
+        </span>
+        <span class="score-card__unit">tied</span>
+      </article>
+
+      <article class="score-card score-card--o" id="scoreO">
+        <span class="score-card__badge" aria-hidden="true">
+          <svg class="mark mark--xs" viewBox="0 0 24 24">
+            <circle class="mark__stroke mark__stroke--o" cx="12" cy="12" r="5.5"/>
+          </svg>
+        </span>
+        <span class="score-card__meta">
+          <span class="score-card__label">Player O</span>
+          <span class="score-card__value" id="scoreOValue">0</span>
+        </span>
+        <span class="score-card__unit">wins</span>
+      </article>
+    </section>
+
+    <!-- Game board -->
+    <section class="board-wrap">
+      <div class="board" id="board" role="group" aria-label="Tic-Tac-Toe board">
+        <!-- Nine cells. They stay in the markup so the game works before any script runs. -->
+        <button class="cell" type="button" data-index="0" aria-label="Row 1, column 1: empty"></button>
+        <button class="cell" type="button" data-index="1" aria-label="Row 1, column 2: empty"></button>
+        <button class="cell" type="button" data-index="2" aria-label="Row 1, column 3: empty"></button>
+        <button class="cell" type="button" data-index="3" aria-label="Row 2, column 1: empty"></button>
+        <button class="cell" type="button" data-index="4" aria-label="Row 2, column 2: empty"></button>
+        <button class="cell" type="button" data-index="5" aria-label="Row 2, column 3: empty"></button>
+        <button class="cell" type="button" data-index="6" aria-label="Row 3, column 1: empty"></button>
+        <button class="cell" type="button" data-index="7" aria-label="Row 3, column 2: empty"></button>
+        <button class="cell" type="button" data-index="8" aria-label="Row 3, column 3: empty"></button>
+
+        <!-- Winning line is drawn on top of the board. -->
+        <svg class="win-line" id="winLine" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path id="winLinePath" d=""/>
+        </svg>
+      </div>
+
+      <p class="board__hint" id="boardHint">Three in a row wins</p>
+    </section>
+
+    <!-- Settings: an iOS grouped list, the same pattern used in the Settings app. -->
+    <section class="settings" aria-label="Settings">
+      <div class="settings__group">
+        <div class="settings__row">
+          <span class="settings__label" id="appearanceLabel">Appearance</span>
+          <div class="segmented-control segmented-control--compact" role="radiogroup" aria-labelledby="appearanceLabel">
+            <span class="segmented-control__thumb" id="appearanceThumb" aria-hidden="true"></span>
+            <button class="segmented-control__item segmented-control__item--interactive is-selected" type="button" role="radio" aria-checked="true" data-appearance="auto">Auto</button>
+            <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-appearance="light">Light</button>
+            <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-appearance="dark">Dark</button>
+          </div>
+        </div>
+
+        <div class="settings__row">
+          <span class="settings__label">
+            <span class="settings__icon" data-icon="speaker" aria-hidden="true"></span>
+            Sound effects
+          </span>
+          <!-- Custom iOS-style switch built with CSS only. -->
+          <button class="switch" id="soundSwitch" type="button" role="switch" aria-checked="true" aria-label="Sound effects">
+            <span class="switch__track"><span class="switch__thumb"></span></span>
+          </button>
+        </div>
+
+        <div class="settings__row">
+          <span class="settings__label">
+            <span class="settings__icon" data-icon="haptics" aria-hidden="true"></span>
+            Haptics
+          </span>
+          <button class="switch" id="hapticsSwitch" type="button" role="switch" aria-checked="true" aria-label="Haptic feedback">
+            <span class="switch__track"><span class="switch__thumb"></span></span>
+          </button>
+        </div>
+
+        <div class="settings__row">
+          <span class="settings__label">
+            <span class="settings__icon" data-icon="eraser" aria-hidden="true"></span>
+            Reset scores
+          </span>
+          <button class="button button--small button--destructive" id="resetScoresButton" type="button">Reset</button>
+        </div>
+      </div>
+
+      <p class="settings__footnote">Appearance follows the system unless you pick Light or Dark. Your choices are saved on this device.</p>
+    </section>
+
+    <!-- Sticky action bar -->
+    <div class="action-bar">
+      <button class="button button--primary" id="newRoundButton" type="button">
+        <span class="button__icon" data-icon="refresh" aria-hidden="true"></span>
+        New Game
+      </button>
+    </div>
+  </main>
+
+  <!-- Screen-reader announcements (never visible). -->
+  <p class="sr-only" id="status" role="status" aria-live="polite"></p>
+
+  <!-- Result alert: native iOS UIAlertController look and feel. -->
+  <div class="alert-backdrop" id="alertBackdrop" hidden>
+    <div class="alert" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" aria-describedby="alertMessage">
+      <p class="alert__title" id="alertTitle">Player X wins</p>
+      <p class="alert__message" id="alertMessage">Three in a row.</p>
+      <div class="alert__actions">
+        <button class="alert__action" type="button" data-action="review">Review board</button>
+        <button class="alert__action alert__action--bold" type="button" data-action="play">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- About sheet: slides up from the bottom, like an iOS sheet. -->
+  <div class="sheet-backdrop" id="sheetBackdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <span class="sheet__handle" aria-hidden="true"></span>
+      <div class="sheet__header">
+        <h2 class="sheet__title" id="sheetTitle">About</h2>
+        <button class="bar-button" id="sheetCloseButton" type="button" aria-label="Close">
+          <span class="bar-button__icon" data-icon="xmark" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="sheet__body">
+        <div class="app-badge" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <rect width="32" height="32" rx="7" fill="#007AFF"/>
+            <path d="M9.5 9.5 22.5 22.5M22.5 9.5 9.5 22.5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="sheet__app-name">iOS-Douz</p>
+        <p class="sheet__version">Version 1.0.0</p>
+        <p class="sheet__text">
+          A classic two-player Tic-Tac-Toe game with a native iOS look and feel, built with plain
+          HTML, CSS and JavaScript. No frameworks, no build step, no dependencies — just open
+          <code>index.html</code>.
+        </p>
+        <div class="sheet__links">
+          <a class="sheet__link" href="README.md">Read the README</a>
+          <a class="sheet__link" href="LICENSE">MIT License</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

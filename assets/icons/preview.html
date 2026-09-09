@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iOS-Douz — Icon reference sheet</title>
+<!-- Self-contained reference sheet for the hand-made icon set. The artwork
+     here matches js/icons.js (24x24 viewBox, 1.75 stroke, rounded caps). -->
+<style>
+  :root {
+    --bg: #F2F2F7; --surface: #FFFFFF; --label: #1C1C1E;
+    --secondary: #6B6B70; --tint: rgba(0,122,255,.10);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --surface: #1C1C1E; --label: #F2F2F7;
+            --secondary: #AEAEB2; --tint: rgba(10,132,255,.16); }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2.5rem 1.25rem; background: var(--bg); color: var(--label);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; letter-spacing: -.02em; margin: 0 0 .25rem; }
+  p.note { color: var(--secondary); line-height: 1.5; max-width: 60ch; }
+  code { background: var(--tint); border-radius: 5px; padding: .1em .35em; font-size: .9em; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: .75rem; margin-top: 1.5rem;
+  }
+  .tile {
+    background: var(--surface); border-radius: 16px; padding: 1rem .5rem .75rem;
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  .tile svg { width: 28px; height: 28px; }
+  .tile span { font-size: .72rem; color: var(--secondary); }
+  .blue { color: #007AFF; } .green { color: #34C759; } .gray { color: #8E8E93; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Icon reference sheet</h1>
+  <p class="note">
+    Every icon in iOS-Douz is drawn from scratch in the SF Symbols language:
+    a 24×24 viewBox, one uniform 1.75 stroke, rounded caps and joins, no fills.
+    Icons use <code>currentColor</code>, so they adapt to any theme. The same
+    artwork is embedded in <code>js/icons.js</code>.
+  </p>
+  <div class="grid">
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 14.6A8.4 8.4 0 0 1 9.4 3.8a8.4 8.4 0 1 0 10.8 10.8Z"/></svg><span>moon</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 12H2.2M21.8 12h-2.2"/><path d="M6.7 6.7 5.1 5.1M18.9 18.9l-1.6-1.6M17.3 6.7l1.6-1.6M5.1 18.9l1.6-1.6"/></svg><span>sun</span></div>
+    <div class="tile"><svg class="blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 11.4a7.4 7.4 0 1 1 2.3 6.1"/><path d="M4.2 5.6v5.4h5.4"/></svg><span>refresh</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6"/><path d="M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8M18.6 18.6l-1.8-1.8M7.2 7.2 5.4 5.4"/></svg><span>gear</span></div>
+    <div class="tile"><svg class="blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.4"/><path d="M12 7.7h.01"/></svg><span>info</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg><span>xmark</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5.4 8.2 12l6.6 6.6"/></svg><span>back</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11.4 5.4 7.6 8.6H4.8v6.8h2.8l3.8 3.2Z"/><path d="M15.2 9.4a3.6 3.6 0 0 1 0 5.2"/><path d="M17.8 7a7 7 0 0 1 0 10"/></svg><span>speaker</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11.4 5.4 7.6 8.6H4.8v6.8h2.8l3.8 3.2Z"/><path d="M15.6 9.8l4.2 4.4M19.8 9.8l-4.2 4.4"/></svg><span>speakerOff</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 10.2v3.6M7.4 7.6v8.8M10.6 4.8v14.4M13.8 8.4v7.2M17 10.6v2.8M20.2 11.4v1.2"/></svg><span>haptics</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.6 19.4 4.4 15.2a1.7 1.7 0 0 1 0-2.4l7-7a1.7 1.7 0 0 1 2.4 0l4.8 4.8a1.7 1.7 0 0 1 0 2.4l-6.2 6.2Z"/><path d="M9.4 8.6l6 6"/><path d="M12.8 19.4H20"/></svg><span>eraser</span></div>
+    <div class="tile"><svg class="blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6"/></svg><span>xMark (player)</span></div>
+    <div class="tile"><svg class="green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/></svg><span>oMark (player)</span></div>
+    <div class="tile"><svg class="gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.2h12M6 14.8h12"/></svg><span>drawMark</span></div>
+  </div>
+</div>
+</body>
+</html>

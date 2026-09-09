@@ -1,0 +1,17 @@
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local development
+node_modules/
+npm-debug.log*
+yarn-error.log
+.env
+.env.local
+
+# Test output
+/coverage/
