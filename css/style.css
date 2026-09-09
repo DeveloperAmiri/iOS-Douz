@@ -256,6 +256,38 @@ code {
 }
 
 /* --------------------------------------------------------------------------
+   6a. Match mode — opponent picker and AI options
+   -------------------------------------------------------------------------- */
+.match { display: flex; flex-direction: column; gap: 0.625rem; }
+
+.match__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  animation: options-in var(--duration-base) var(--spring);
+}
+
+@keyframes options-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.match__you { display: flex; align-items: center; gap: 0.5rem; }
+
+.match__you-label {
+  font-size: var(--text-footnote);
+  font-weight: 500;
+  color: var(--color-tertiary-text);
+}
+
+.segmented-control--marks .segmented-control__item { min-width: 44px; }
+
+/* While the AI "thinks", squares lose the pointer affordance. */
+.board.is-locked .cell:not(:disabled) { cursor: progress; }
+
+/* --------------------------------------------------------------------------
    6. Turn indicator — iOS segmented control
    -------------------------------------------------------------------------- */
 .turn { text-align: center; }

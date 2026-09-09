@@ -25,6 +25,9 @@
   var KEY_SOUND = STORAGE_PREFIX + 'sound';
   var KEY_HAPTICS = STORAGE_PREFIX + 'haptics';
   var KEY_SCORES = STORAGE_PREFIX + 'scores';
+  var KEY_MODE = STORAGE_PREFIX + 'mode';
+  var KEY_LEVEL = STORAGE_PREFIX + 'ai-level';
+  var KEY_MARK = STORAGE_PREFIX + 'human-mark';
 
   /**
    * Read a value from localStorage, tolerating browsers where storage is
@@ -81,7 +84,14 @@
     alertMessage: $('#alertMessage'),
     alertActions: document.querySelector('.alert__actions'),
     sheetBackdrop: $('#sheetBackdrop'),
-    sheetCloseButton: $('#sheetCloseButton')
+    sheetCloseButton: $('#sheetCloseButton'),
+    modeControl: $('#modeControl'),
+    modeThumb: $('#modeThumb'),
+    aiOptions: $('#aiOptions'),
+    levelControl: $('#levelControl'),
+    levelThumb: $('#levelThumb'),
+    markControl: $('#markControl'),
+    markThumb: $('#markThumb')
   };
 
   /* ----------------------------------------------------------------------
@@ -251,6 +261,16 @@
   var soundEnabled = readStore(KEY_SOUND) !== 'false';
   var hapticsEnabled = readStore(KEY_HAPTICS) !== 'false';
 
+  /* Match setup: two players on one device, or a match against the AI. */
+  var mode = readStore(KEY_MODE) === 'ai' ? 'ai' : 'pvp';
+  var aiLevel = ['easy', 'medium', 'hard'].indexOf(readStore(KEY_LEVEL)) !== -1
+    ? readStore(KEY_LEVEL) : 'hard';
+  var humanMark = readStore(KEY_MARK) === 'O' ? 'O' : 'X';
+
+  /* True while the AI is "thinking" between its scheduled move. */
+  var aiThinking = false;
+  var aiTimer = null;
+
   function setSwitch(button, isOn) {
     button.setAttribute('aria-checked', String(isOn));
   }
@@ -260,6 +280,20 @@
    * ------------------------------------------------------------------- */
 
   var game = new TicTacToe.TicTacToeGame();
+
+  /** The mark the AI plays in the current setup. */
+  function aiMark() {
+    return humanMark === 'X' ? 'O' : 'X';
+  }
+
+  /**
+   * Human-facing name for a mark: "Player X" against a friend,
+   * "You" / "AI" against the computer.
+   */
+  function nameFor(player) {
+    if (mode !== 'ai') { return 'Player ' + player; }
+    return player === humanMark ? 'You' : 'AI';
+  }
 
   /** Restore the running score from a previous visit. */
   function restoreScores() {
@@ -315,7 +349,7 @@
       cell.classList.toggle('is-filled', Boolean(value));
       cell.classList.toggle('is-winning', false);
       cell.classList.remove('is-shaking');
-      cell.disabled = game.isOver() || Boolean(value);
+      cell.disabled = game.isOver() || Boolean(value) || aiThinking;
       cell.setAttribute('aria-label', cellDescription(index, value));
       cell.innerHTML = value ? markMarkup(value) : '';
     });
@@ -360,14 +394,33 @@
     if (unitO) { unitO.textContent = winner === TicTacToe.PLAYER_O ? 'winner' : 'wins'; }
   }
 
+  /** Refresh the player names shown on the turn control and score cards. */
+  function renderLabels() {
+    elements.segmentX.querySelector('.segmented-control__label').textContent = nameFor('X');
+    elements.segmentO.querySelector('.segmented-control__label').textContent = nameFor('O');
+    elements.scoreX.querySelector('.score-card__label').textContent = nameFor('X');
+    elements.scoreO.querySelector('.score-card__label').textContent = nameFor('O');
+  }
+
   /** Update the caption under the segmented control. */
   function renderHint() {
     if (game.winner) {
-      elements.turnHint.textContent = 'Player ' + game.winner + ' wins the round';
+      var winnerName = nameFor(game.winner);
+      elements.turnHint.textContent = winnerName === 'You'
+        ? 'You win the round'
+        : winnerName + ' wins the round';
     } else if (game.isDraw) {
       elements.turnHint.textContent = 'Draw — nobody scored';
+    } else if (aiThinking) {
+      elements.turnHint.textContent = 'AI is thinking…';
     } else if (game.filledCount() === 0) {
-      elements.turnHint.textContent = 'Tap a square to play';
+      elements.turnHint.textContent = mode === 'ai'
+        ? (game.currentPlayer === humanMark ? 'You open the round' : 'AI opens the round')
+        : 'Tap a square to play';
+    } else if (mode === 'ai') {
+      elements.turnHint.textContent = game.currentPlayer === humanMark
+        ? 'Your turn'
+        : 'AI is thinking…';
     } else {
       elements.turnHint.textContent = 'Player ' + game.currentPlayer + ', your turn';
     }
@@ -385,6 +438,7 @@
   /** Paint every part of the interface from the model. */
   function render(changedScore) {
     renderBoard();
+    renderLabels();
     updateTurnControl();
     renderScores(changedScore);
     renderWinnerCard(game.winner);
@@ -565,6 +619,17 @@
 
   /** Handle a tap on a square. */
   function onCellClick(index) {
+    // While the AI thinks, or while it is the AI's turn, ignore human taps.
+    if (aiThinking) { return; }
+    if (mode === 'ai' && game.isInProgress() && game.currentPlayer !== humanMark) {
+      announce('The AI is taking its turn');
+      return;
+    }
+    applyMove(index);
+  }
+
+  /** Apply a move for whoever is on turn — human or AI — and update the UI. */
+  function applyMove(index) {
     var result = game.play(index);
 
     if (!result.played) {
@@ -593,6 +658,8 @@
       });
       // Colour the winning line and tints with the winner, not a fixed hue.
       elements.board.setAttribute('data-winner', result.winner);
+      setLocked(false);
+      elements.cells.forEach(function (square) { square.disabled = true; });
       showWinLine(result.winningLine);
       renderScores(result.player);
       renderWinnerCard(result.winner);
@@ -601,12 +668,13 @@
       persistScores();
       Sound.win();
       Haptics.win();
-      announce('Player ' + result.winner + ' wins. Score: X ' + game.scores.X +
-        ', O ' + game.scores.O + ', draws ' + game.scores.draws);
+      announce(nameFor(result.winner) + (nameFor(result.winner) === 'You' ? ' win' : ' wins') +
+        '. Score: X ' + game.scores.X + ', O ' + game.scores.O + ', draws ' + game.scores.draws);
 
       window.setTimeout(function () {
         showAlert({
-          title: 'Player ' + result.winner + ' wins',
+          title: nameFor(result.winner) === 'You' ? 'You win'
+            : nameFor(result.winner) + ' wins',
           message: 'Three in a row. The score is X ' + game.scores.X + ' – ' + game.scores.O + '.',
           actions: [
             { key: 'review', label: 'Review board' },
@@ -620,6 +688,8 @@
     }
 
     if (result.isDraw) {
+      setLocked(false);
+      elements.cells.forEach(function (square) { square.disabled = true; });
       renderScores('draws');
       renderHint();
       persistScores();
@@ -644,15 +714,50 @@
 
     updateTurnControl();
     renderHint();
-    announce('Player ' + result.player + ' played. Player ' + game.currentPlayer + ' to play.');
+    announce(nameFor(result.player) + ' played. ' +
+      (nameFor(game.currentPlayer) === 'You' ? 'Your turn.' : nameFor(game.currentPlayer) + ' to play.'));
+    scheduleAiMove();
+  }
+
+  /* ----------------------------------------------------------------------
+   * AI turn — the computer answers after a short, human-feeling pause
+   * ------------------------------------------------------------------- */
+
+  /** Lock or unlock the empty squares while the AI thinks. */
+  function setLocked(locked) {
+    aiThinking = locked;
+    elements.board.classList.toggle('is-locked', locked);
+    elements.cells.forEach(function (cell, index) {
+      if (!game.at(index) && !game.isOver()) { cell.disabled = locked; }
+    });
+  }
+
+  /** If it is the AI's turn, schedule its move. */
+  function scheduleAiMove() {
+    if (mode !== 'ai' || !game.isInProgress() || game.currentPlayer !== aiMark()) { return; }
+    setLocked(true);
+    renderHint();
+    aiTimer = window.setTimeout(function () {
+      aiTimer = null;
+      var index = window.DouzAi.bestMove(game.board.slice(), aiMark(), aiLevel);
+      setLocked(false);
+      if (index >= 0) { applyMove(index); }
+    }, 600);
   }
 
   /** Clear the board for another round, keeping the score. */
   function startNewRound() {
+    if (aiTimer) { window.clearTimeout(aiTimer); aiTimer = null; }
+    aiThinking = false;
+    elements.board.classList.remove('is-locked');
     game.resetRound();
     render();
-    announce('New round. Player X to play.');
-    elements.cells[0].focus();
+    announce('New round. ' +
+      (nameFor('X') === 'You' ? 'You open' : nameFor('X') + ' opens') + '.');
+    if (!(mode === 'ai' && game.currentPlayer !== humanMark)) {
+      elements.cells[0].focus();
+    }
+    scheduleAiMove();
   }
 
   /** Ask before clearing the score, using the same alert component. */
@@ -696,6 +801,30 @@
   }
 
   /* ----------------------------------------------------------------------
+   * Match-mode controls
+   * ------------------------------------------------------------------- */
+
+  /** Mark the selected item of a segmented control and slide its thumb. */
+  function syncControl(control, thumb, attribute, value) {
+    var items = control.querySelectorAll('[' + attribute + ']');
+    Array.prototype.forEach.call(items, function (item) {
+      var selected = item.getAttribute(attribute) === value;
+      item.classList.toggle('is-selected', selected);
+      item.setAttribute('aria-checked', String(selected));
+    });
+    moveThumb(control, thumb, '[' + attribute + '="' + value + '"]');
+  }
+
+  /** Show/hide the AI options and refresh every mode-related control. */
+  function updateModeUi() {
+    elements.aiOptions.hidden = mode !== 'ai';
+    syncControl(elements.modeControl, elements.modeThumb, 'data-mode', mode);
+    syncControl(elements.levelControl, elements.levelThumb, 'data-level', aiLevel);
+    syncControl(elements.markControl, elements.markThumb, 'data-mark', humanMark);
+    renderLabels();
+  }
+
+  /* ----------------------------------------------------------------------
    * Wiring
    * ------------------------------------------------------------------- */
 
@@ -714,6 +843,39 @@
 
     elements.sheetBackdrop.addEventListener('click', function (event) {
       if (event.target === elements.sheetBackdrop) { closeSheet(); }
+    });
+
+    // Match mode: friend on the same device, or the AI.
+    elements.modeControl.addEventListener('click', function (event) {
+      var item = event.target.closest('[data-mode]');
+      if (!item) { return; }
+      var next = item.getAttribute('data-mode');
+      if (next === mode) { return; }
+      mode = next;
+      writeStore(KEY_MODE, mode);
+      updateModeUi();
+      startNewRound();
+    });
+
+    // AI difficulty applies from the next AI move; no reset needed.
+    elements.levelControl.addEventListener('click', function (event) {
+      var item = event.target.closest('[data-level]');
+      if (!item) { return; }
+      aiLevel = item.getAttribute('data-level');
+      writeStore(KEY_LEVEL, aiLevel);
+      updateModeUi();
+    });
+
+    // Changing your mark starts a fresh round against the AI.
+    elements.markControl.addEventListener('click', function (event) {
+      var item = event.target.closest('[data-mark]');
+      if (!item) { return; }
+      var next = item.getAttribute('data-mark');
+      if (next === humanMark) { return; }
+      humanMark = next;
+      writeStore(KEY_MARK, humanMark);
+      updateModeUi();
+      startNewRound();
     });
 
     // Appearance segmented control.
@@ -745,6 +907,7 @@
       if (game.winningLine) { showWinLine(game.winningLine, false); }
       updateTurnControl();
       updateAppearanceControl();
+      updateModeUi();
     });
   }
 
@@ -758,8 +921,10 @@
     setSwitch(elements.soundSwitch, soundEnabled);
     setSwitch(elements.hapticsSwitch, hapticsEnabled);
     restoreScores();
+    updateModeUi();
     render();
     bindEvents();
+    scheduleAiMove();   // covers a saved "AI opens" setup from a previous visit
   }
 
   if (document.readyState === 'loading') {

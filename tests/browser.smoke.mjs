@@ -194,6 +194,36 @@ try {
   check('Escape closes the sheet', true);
 
   /* ---------------------------------------------------------------- */
+  group('AI mode');
+
+  await page.locator('[data-mode="ai"]').click();
+  check('choosing vs AI reveals the AI options',
+    await page.locator('#aiOptions').isVisible());
+  check('labels switch to You / AI',
+    (await page.locator('#segmentX .segmented-control__label').textContent()) === 'You' &&
+    (await page.locator('#segmentO .segmented-control__label').textContent()) === 'AI');
+
+  await page.locator('.cell[data-index="0"]').click();
+  check('the human mark is placed',
+    await page.locator('.cell[data-index="0"] .mark__stroke--x').count() === 1);
+  await page.waitForSelector('.cell .mark__stroke--o', { timeout: 4000 });
+  check('the AI answers with its own mark',
+    await page.locator('.cell .mark__stroke--o').count() === 1);
+
+  // Switch sides: the AI must now open the round by itself.
+  await page.locator('[data-mark="O"]').click();
+  await page.waitForSelector('.cell .mark__stroke--x', { timeout: 4000 });
+  check('after switching sides the AI opens the round on its own',
+    await page.locator('.cell .mark__stroke--x').count() === 1);
+  check('the score card follows the new names',
+    (await page.locator('#scoreX .score-card__label').textContent()) === 'AI' &&
+    (await page.locator('#scoreO .score-card__label').textContent()) === 'You');
+
+  await page.locator('[data-mode="pvp"]').click();
+  check('switching back restores Two Players labels',
+    (await page.locator('#segmentX .segmented-control__label').textContent()) === 'Player X');
+
+  /* ---------------------------------------------------------------- */
   group('Console');
 
   check('no console errors were logged', consoleErrors.length === 0, consoleErrors.join(' | '));

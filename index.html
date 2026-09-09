@@ -52,6 +52,38 @@
 
   <main class="app" id="app">
 
+    <!-- Match mode: two players on one device, or versus the built-in AI. -->
+    <section class="match" aria-label="Match mode">
+      <div class="segmented-control" role="radiogroup" aria-label="Opponent" id="modeControl">
+        <span class="segmented-control__thumb" id="modeThumb" aria-hidden="true"></span>
+        <button class="segmented-control__item segmented-control__item--interactive is-selected" type="button" role="radio" aria-checked="true" data-mode="pvp">Two Players</button>
+        <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-mode="ai">vs AI</button>
+      </div>
+
+      <!-- Only relevant against the AI: how hard it tries, and your mark. -->
+      <div class="match__options" id="aiOptions" hidden>
+        <div class="segmented-control segmented-control--compact" role="radiogroup" aria-label="AI difficulty" id="levelControl">
+          <span class="segmented-control__thumb" id="levelThumb" aria-hidden="true"></span>
+          <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-level="easy">Easy</button>
+          <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-level="medium">Medium</button>
+          <button class="segmented-control__item segmented-control__item--interactive is-selected" type="button" role="radio" aria-checked="true" data-level="hard">Hard</button>
+        </div>
+
+        <div class="match__you">
+          <span class="match__you-label" id="youPlayLabel">You play</span>
+          <div class="segmented-control segmented-control--compact segmented-control--marks" role="radiogroup" aria-labelledby="youPlayLabel" id="markControl">
+            <span class="segmented-control__thumb" id="markThumb" aria-hidden="true"></span>
+            <button class="segmented-control__item segmented-control__item--interactive is-selected" type="button" role="radio" aria-checked="true" data-mark="X">
+              <svg class="mark mark--xs" viewBox="0 0 24 24" aria-hidden="true"><path class="mark__stroke mark__stroke--x" d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg>
+            </button>
+            <button class="segmented-control__item segmented-control__item--interactive" type="button" role="radio" aria-checked="false" data-mark="O">
+              <svg class="mark mark--xs" viewBox="0 0 24 24" aria-hidden="true"><circle class="mark__stroke mark__stroke--o" cx="12" cy="12" r="5.5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Turn indicator, rendered as an iOS segmented control. -->
     <section class="turn" aria-labelledby="turnCaption">
       <p class="turn__caption" id="turnCaption">Turn</p>
@@ -226,7 +258,7 @@
           </svg>
         </div>
         <p class="sheet__app-name">iOS-Douz</p>
-        <p class="sheet__version">Version 1.0.0</p>
+        <p class="sheet__version">Version 1.1.0</p>
         <p class="sheet__text">
           A classic two-player Tic-Tac-Toe game with a native iOS look and feel, built with plain
           HTML, CSS and JavaScript. No frameworks, no build step, no dependencies — just open
@@ -242,6 +274,7 @@
 
   <script src="js/icons.js"></script>
   <script src="js/game.js"></script>
+  <script src="js/ai.js"></script>
   <script src="js/ui.js"></script>
 </body>
 </html>

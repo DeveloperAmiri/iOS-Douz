@@ -40,7 +40,8 @@ Clone it, open `index.html`, and play.
 
 | Area | What you get |
 | --- | --- |
-| **Gameplay** | Classic 3×3 Tic-Tac-Toe, two players, X always opens, all 8 winning lines detected, draw detection |
+| **Gameplay** | Classic 3×3 Tic-Tac-Toe — two players on one device *or* versus the built-in AI; X always opens, all 8 winning lines detected, draw detection |
+| **AI opponent** | Three real algorithms: uniform random (Easy), win–block heuristic (Medium), and full-depth **minimax with alpha–beta pruning** (Hard, unbeatable). You can play as X or O |
 | **Score** | Persistent scoreboard (X wins, draws, O wins) saved in `localStorage` |
 | **Appearance** | Auto / Light / Dark segmented control, follows `prefers-color-scheme`, choice remembered between visits |
 | **Motion** | Spring-eased mark reveal, animated winning line, bouncing score counter, sheet and alert transitions |
@@ -75,6 +76,9 @@ python3 -m http.server 8000
 
 ### How to play
 
+- Pick the opponent at the top: **Two Players** shares one device, **vs AI**
+  plays the computer. Against the AI you also choose its difficulty and
+  whether you play X or O.
 - Tap (or focus with Tab and press Enter) any empty square to place your mark.
 - Players alternate: **X** first, then **O**.
 - Three marks in a row, column or diagonal wins the round.
@@ -93,12 +97,14 @@ iOS-Douz/
 ├── js/
 │   ├── icons.js            Hand-made SF Symbols-style icon set
 │   ├── game.js             Pure game logic — no DOM, unit tested
+│   ├── ai.js               AI opponent: minimax + alpha–beta, heuristic, random
 │   └── ui.js               Rendering, dialogs, theme, sound, persistence
 ├── assets/
 │   └── icons/
 │       └── preview.html    Visual reference sheet for the icon set
 ├── tests/
-│   └── game.test.js        Node test suite for the game logic
+│   ├── game.test.js        Node test suite for the game logic
+│   └── ai.test.js          Node test suite for the AI (never-loses proof included)
 ├── .nojekyll               Stops GitHub Pages from ignoring `_`-prefixed files
 ├── .gitignore
 ├── LICENSE                 MIT
@@ -160,10 +166,11 @@ for overshoot and is disabled automatically under `prefers-reduced-motion`.
 The game logic is deliberately DOM-free, so it runs under plain Node.js.
 
 ```bash
-node tests/game.test.js
+node tests/game.test.js   # 36 checks — rules, wins, draws, scores, undo
+node tests/ai.test.js     # 15 checks — tactics, and hard AI never losing
 ```
 
-A passing run prints a list of assertions and ends with `All 36 checks passed.`
+Each suite prints its assertions and ends with `All N checks passed.`
 
 There is also an optional end-to-end smoke test that drives the real page in
 headless Chromium (Playwright is a development-only dependency and is never
@@ -172,7 +179,7 @@ shipped):
 ```bash
 npm install --no-save playwright
 npx playwright install chromium
-node tests/browser.smoke.mjs   # 38 checks: boot, play, theme, a11y, screenshots
+node tests/browser.smoke.mjs   # 45 checks: boot, play, AI mode, theme, a11y, screenshots
 ```
 
 ## Deploy to GitHub Pages
