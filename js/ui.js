@@ -415,7 +415,9 @@
       elements.turnHint.textContent = 'AI is thinking…';
     } else if (game.filledCount() === 0) {
       elements.turnHint.textContent = mode === 'ai'
-        ? (game.currentPlayer === humanMark ? 'You open the round' : 'AI opens the round')
+        ? (game.currentPlayer === humanMark
+          ? 'You open the round — tap any square'
+          : 'AI opens the round…')
         : 'Tap a square to play';
     } else if (mode === 'ai') {
       elements.turnHint.textContent = game.currentPlayer === humanMark
