@@ -1,6 +1,6 @@
 # iOS-Douz
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-007AFF?style=flat-square)](https://YOUR-USERNAME.github.io/iOS-Douz/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-007AFF?style=flat-square)](https://developeramiri.github.io/iOS-Douz/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34C759.svg?style=flat-square)](LICENSE)
 [![No dependencies](https://img.shields.io/badge/dependencies-none-8E8E93?style=flat-square)](#)
 
@@ -9,8 +9,9 @@
 No frameworks, no build step, no dependencies — just HTML, CSS and JavaScript.
 Clone it, open `index.html`, and play.
 
-> **Live demo:** `https://YOUR-USERNAME.github.io/iOS-Douz/`
-> Replace `YOUR-USERNAME` with your own GitHub username (see [Deploy to GitHub Pages](#deploy-to-github-pages)).
+> **Live demo:** `https://developeramiri.github.io/iOS-Douz/`
+> This repository deploys its own demo. For a fork, replace the username as
+> described in [Deploy to GitHub Pages](#deploy-to-github-pages).
 
 | Light | Dark |
 | :---: | :---: |
