@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://developeramiri.github.io/iOS-Douz/sitemap.xml

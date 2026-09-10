@@ -3,6 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-007AFF?style=flat-square)](https://developeramiri.github.io/iOS-Douz/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34C759.svg?style=flat-square)](LICENSE)
 [![No dependencies](https://img.shields.io/badge/dependencies-none-8E8E93?style=flat-square)](#)
+[![CI](https://github.com/DeveloperAmiri/iOS-Douz/actions/workflows/ci.yml/badge.svg)](https://github.com/DeveloperAmiri/iOS-Douz/actions/workflows/ci.yml)
 
 **A classic two-player Tic-Tac-Toe game that looks and feels like a native iOS app.**
 
@@ -60,7 +61,7 @@ That is the whole installation process. There is no build step and no server
 requirement — the game also works from the `file://` protocol.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/iOS-Douz.git
+git clone https://github.com/DeveloperAmiri/iOS-Douz.git
 cd iOS-Douz
 open index.html        # macOS
 # xdg-open index.html  # Linux
@@ -203,7 +204,7 @@ git init
 git add .
 git commit -m "Add iOS-Douz: an iOS-styled Tic-Tac-Toe game"
 git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/iOS-Douz.git
+git remote add origin https://github.com/DeveloperAmiri/iOS-Douz.git
 git push -u origin main
 ```
 

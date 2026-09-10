@@ -1,0 +1,16 @@
+{
+  "name": "ios-douz",
+  "version": "1.1.0",
+  "description": "A classic Tic-Tac-Toe game with a native iOS look and feel. Pure HTML, CSS and JavaScript.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/game.test.js && node tests/ai.test.js",
+    "test:game": "node tests/game.test.js",
+    "test:ai": "node tests/ai.test.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": ["tic-tac-toe", "game", "ios", "minimax", "vanilla-js"],
+  "author": "AMIRI",
+  "license": "MIT",
+  "engines": { "node": ">=16" }
+}
